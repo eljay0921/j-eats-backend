@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import * as Joi from 'joi'; // TS 또는 NestJS가 아닌 라이브러리(패키지)의 경우 (보통 자바스크립트) 이렇게 임포트한다.
+import { Restaurant } from './restaurants/entities/restaurants.entity';
 
 @Module({
   imports: [
@@ -30,8 +31,9 @@ import * as Joi from 'joi'; // TS 또는 NestJS가 아닌 라이브러리(패키
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD, // 사실 localhost로 연결할 때는 비말번호를 묻지 않기 때문에 입력하지 않아도 됨
       database: process.env.DB_NAME,
-      synchronize: true, // DB에 연결할 때, DB를 현재 모듈의 상태로 마이그레이션
+      synchronize: process.env.NODE_ENV !== 'prod', // DB에 연결할 때, DB를 현재 모듈의 상태로 마이그레이션
       logging: true,
+      entities: [Restaurant],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
