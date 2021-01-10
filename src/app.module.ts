@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import * as Joi from 'joi'; // TS 또는 NestJS가 아닌 라이브러리(패키지)의 경우 (보통 자바스크립트) 이렇게 임포트한다.
 
 @Module({
   imports: [
@@ -11,6 +12,16 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
       envFilePath:
         process.env.NODE_ENV === 'dev' ? './envs/.env.dev' : './envs/.env.test',
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string()
+          .valid('dev', 'prod')
+          .required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.string().required(),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_NAME: Joi.string().required(),
+      }),
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
