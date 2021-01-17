@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
+import { UpdateRestaurantDto } from './dtos/update-resturant.dto';
 import { Restaurant } from './entities/restaurants.entity';
 
 @Injectable()
@@ -23,5 +24,9 @@ export class RestaurantService {
 
     // 이후 실제로 DB에 저장하기 위해서 save() 메서드를 사용하자.
     return this.restaurant.save(newRestaurant);
+  }
+
+  updateRestaurant({ id, data }: UpdateRestaurantDto): Promise<UpdateResult> {
+    return this.restaurant.update(id, { ...data });
   }
 }
