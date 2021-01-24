@@ -1,9 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  CreateAccountInput,
-  CreateAccountOutput,
-} from './dtos/create-account.dto';
+import { CreateAccountInput } from './dtos/create-account.dto';
 import { User } from './entities/user.entity';
 
 export class UsersService {
@@ -11,21 +8,25 @@ export class UsersService {
     @InjectRepository(User) private readonly users: Repository<User>,
   ) {}
 
-  async createAccount({ email, password, role }: CreateAccountInput) {
+  async createAccount({
+    email,
+    password,
+    role,
+  }: CreateAccountInput): Promise<string | undefined> {
     try {
+      console.log(email);
       // Checking new user (email)
-      const exists = this.users.findOne({ email }); // { email: email }
+      const exists = await this.users.findOne({ email }); // { email: email }
+      console.log(exists);
       if (exists) {
         // already exist email
-        return;
+        return 'This email already exists.';
       }
       // Creating account (with hashing password)
       await this.users.save(this.users.create({ email, password, role }));
-      // return results
-      return true;
     } catch (err) {
       console.log(err);
-      return;
+      return "Couldn't create account.";
     }
   }
 }
