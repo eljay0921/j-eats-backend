@@ -2,9 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestaurantsModule } from './restaurants/restaurants.module';
 import * as Joi from 'joi'; // TS 또는 NestJS가 아닌 라이브러리(패키지)의 경우 (보통 자바스크립트) 이렇게 임포트한다.
-import { Restaurant } from './restaurants/entities/restaurants.entity';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
@@ -25,6 +23,7 @@ import { User } from './users/entities/user.entity';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
+        TOKEN_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
