@@ -6,6 +6,7 @@ import * as Joi from 'joi'; // TS 또는 NestJS가 아닌 라이브러리(패키
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { User } from './users/entities/user.entity';
     }),
     UsersModule,
     CommonModule,
+    JwtModule.forRoot(),
   ],
   controllers: [],
   providers: [],
