@@ -12,4 +12,12 @@ export class JwtService {
   sign(id: number): string {
     return jwt.sign({ id }, this.options.privateKey);
   }
+
+  verify(token: string) {
+    try {
+      return jwt.verify(token, this.options.privateKey);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 }
