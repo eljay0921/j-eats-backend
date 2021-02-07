@@ -63,7 +63,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(JwtMiddleware).forRoutes({
       path: '*',
-      method: RequestMethod.ALL,
+      method: RequestMethod.POST,
     });
   }
 }
