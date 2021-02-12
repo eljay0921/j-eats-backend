@@ -17,40 +17,22 @@ import { UsersService } from './user.service';
 export class UsersResolver {
   constructor(private readonly userService: UsersService) {}
 
-  @Query(returns => Boolean)
-  Hi(): boolean {
-    return true;
-  }
-
   @Mutation(returns => CreateAccountOutput)
   async createAccount(
     @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
-    try {
-      return this.userService.createAccount(createAccountInput);
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.userService.createAccount(createAccountInput);
   }
 
   @Mutation(returns => LoginOutput)
   async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
-    try {
-      return this.userService.login(loginInput);
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.userService.login(loginInput);
   }
 
   @Query(returns => User)
   @UseGuards(AuthGuard)
-  me(@AuthUser() authUser: User) {
+  me(@AuthUser() authUser: User): User {
+    console.log(authUser);
     return authUser;
   }
 
@@ -59,22 +41,7 @@ export class UsersResolver {
   async userProfile(
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
-    try {
-      const user = await this.userService.findById(userProfileInput.userId);
-      if (user) {
-        return {
-          ok: true,
-          user,
-        };
-      }
-
-      throw Error('User not found.');
-    } catch (error) {
-      return {
-        error,
-        ok: false,
-      };
-    }
+    return this.userService.findById(userProfileInput.userId);
   }
 
   @UseGuards(AuthGuard)
@@ -83,34 +50,11 @@ export class UsersResolver {
     @AuthUser() authUser: User,
     @Args('input') editProfileInput: EditProfileInput,
   ): Promise<EditProfileOutput> {
-    try {
-      const user = await this.userService.editProfile(
-        authUser.id,
-        editProfileInput,
-      );
-      return {
-        ok: Boolean(user),
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.userService.editProfile(authUser.id, editProfileInput);
   }
 
   @Mutation(returns => VerifyEmailOutput)
   verifyEmail(@Args('input') { code }: VerifyEmailInput) {
-    try {
-      const verified = this.userService.verifyEmail(code);
-      return {
-        ok: verified,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.userService.verifyEmail(code);
   }
 }
