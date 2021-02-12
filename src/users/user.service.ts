@@ -5,10 +5,13 @@ import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import { Verification } from './entities/verification.entity';
 
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verifications: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -18,16 +21,16 @@ export class UsersService {
     role,
   }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
     try {
-      console.log(email);
-      // Checking new user (email)
       const exists = await this.users.findOne({ email }); // { email: email }
-      console.log(exists);
       if (exists) {
-        // already exist email
         return { ok: false, error: 'This email already exists.' };
       }
-      // Creating account (with hashing password)
-      await this.users.save(this.users.create({ email, password, role }));
+
+      const user = await this.users.save(
+        this.users.create({ email, password, role }),
+      );
+      await this.verifications.save(this.verifications.create({ user }));
+
       return { ok: true };
     } catch (err) {
       console.log(err);
@@ -82,6 +85,8 @@ export class UsersService {
     if (user) {
       if (email) {
         user.email = email;
+        user.verified = false;
+        await this.verifications.save(this.verifications.create({ user }));
       }
 
       if (password) {
