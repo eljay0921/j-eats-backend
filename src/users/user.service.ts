@@ -46,7 +46,10 @@ export class UsersService {
       // 1. find user with email
       // 2. check password
       // 3. make JWT token & give it to user
-      const user = await this.users.findOne({ email });
+      const user = await this.users.findOne(
+        { email },
+        { select: ['id', 'password'] },
+      );
       if (user) {
         const passwordCorrect = await user.checkPassword(password);
         if (passwordCorrect) {
@@ -95,5 +98,20 @@ export class UsersService {
 
       return this.users.save(user);
     }
+  }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    const verification = await this.verifications.findOne(
+      { code },
+      // { loadRelationIds: true },
+      { relations: ['user'] },
+    );
+    if (verification) {
+      console.log(verification);
+      verification.user.verified = true;
+      this.users.save(verification.user);
+      return true;
+    }
+    return false;
   }
 }
