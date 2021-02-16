@@ -8,6 +8,7 @@ import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
 import { UserProfileOutput } from './dtos/user-profile.dto';
 import { VerifyEmailOutput } from './dtos/verify-email.dto';
+import { MailService } from 'src/mail/mail.service';
 
 export class UsersService {
   constructor(
@@ -15,6 +16,7 @@ export class UsersService {
     @InjectRepository(Verification)
     private readonly verifications: Repository<Verification>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async createAccount({
@@ -23,15 +25,27 @@ export class UsersService {
     role,
   }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
     try {
+      // 존재하는지 체크
       const exists = await this.users.findOne({ email }); // { email: email }
       if (exists) {
         return { ok: false, error: 'This email already exists.' };
       }
 
+      // account 생성 및 저장
       const user = await this.users.save(
         this.users.create({ email, password, role }),
       );
-      await this.verifications.save(this.verifications.create({ user }));
+
+      // verification 생성 및 저장
+      const verification = await this.verifications.save(
+        this.verifications.create({ user }),
+      );
+
+      // email 인증 요구
+      await this.mailService.sendVerificationEmail(
+        user.email,
+        verification.code,
+      );
 
       return { ok: true };
     } catch (err) {
@@ -109,7 +123,15 @@ export class UsersService {
         if (email) {
           user.email = email;
           user.verified = false;
-          await this.verifications.save(this.verifications.create({ user }));
+          const verification = await this.verifications.save(
+            this.verifications.create({ user }),
+          );
+
+          // email 인증 요구
+          await this.mailService.sendVerificationEmail(
+            user.email,
+            verification.code,
+          );
         }
 
         if (password) {
