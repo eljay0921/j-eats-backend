@@ -9,17 +9,19 @@ export class MailService {
   constructor(
     @Inject(CONFIG_OPTIONS) private readonly options: MailModuleOptions,
   ) {
-    this.sendEmail('Test Subject !!', 'Test Contents !!!!!'); // 테스트 용
+    this.sendEmail('Test Subject !!', 'confirm_account'); // 테스트 용
   }
 
-  private async sendEmail(subject: string, content: string) {
+  private async sendEmail(subject: string, template: string) {
     const form = new FormData();
     // 보내는 사람
     form.append('from', `Excited User <mailgun@${this.options.domain}>`);
     // 받는 사람을 지정할 수 있지만, 우리는 mailgun에 카드를 등록하지 않았으므로, 인증된 메일로만 보낼 수 있다.
     form.append('to', `ivynk0921@gmail.com`);
     form.append('subject', subject);
-    form.append('text', content);
+    form.append('template', template); // 템플릿 이름
+    form.append('v:username', 'jjiinn'); // 템플릿에 필요한 데이터
+    form.append('v:code', '1234'); // 템플릿에 필요한 데이터
 
     const response = await got(
       `https://api.mailgun.net/v3/${this.options.domain}/messages`,
