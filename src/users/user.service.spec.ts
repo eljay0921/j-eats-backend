@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
+import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { UsersService } from './user.service';
@@ -21,8 +22,11 @@ const mockMailService = {
   sendVerificationEmail: jest.fn(),
 };
 
+type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+
 describe('UserService', () => {
   let service: UsersService;
+  let usersRepository: MockRepository<User>; // UserRepository의 모든 함수를 가져오기 위함
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -48,13 +52,32 @@ describe('UserService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
+    usersRepository = module.get(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it.todo('createAccount');
+  describe('createAccount', () => {
+    it('should fail if user exists', async () => {
+      usersRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'blahblahblah',
+      });
+
+      const result = await service.createAccount({
+        email: '',
+        password: '',
+        role: 0,
+      });
+
+      expect(result).toMatchObject({
+        ok: false,
+        error: 'This email already exists.',
+      });
+    });
+  });
   it.todo('login');
   it.todo('findById');
   it.todo('editProfile');
