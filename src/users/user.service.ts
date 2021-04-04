@@ -49,7 +49,6 @@ export class UsersService {
 
       return { ok: true };
     } catch (err) {
-      console.log(err);
       return { ok: false, error: "Couldn't create account." };
     }
   }
