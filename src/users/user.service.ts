@@ -92,22 +92,16 @@ export class UsersService {
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.users.findOne({ id });
-      if (user) {
-        return {
-          ok: true,
-          user,
-        };
-      }
-
+      const user = await this.users.findOneOrFail({ id });
       return {
         ok: true,
-        error: 'User not found.',
+        user,
       };
     } catch (error) {
+      console.log(error.message);
       return {
         ok: false,
-        error,
+        error: 'User not found.',
       };
     }
   }
