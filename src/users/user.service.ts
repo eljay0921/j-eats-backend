@@ -112,39 +112,23 @@ export class UsersService {
   ): Promise<EditProfileOutput> {
     try {
       const user = await this.users.findOne(userId);
-      if (user) {
-        if (email) {
-          user.email = email;
-          user.verified = false;
-          const verification = await this.verifications.save(
-            this.verifications.create({ user }),
-          );
-
-          // email 인증 요구
-          await this.mailService.sendVerificationEmail(
-            user.email,
-            verification.code,
-          );
-        }
-
-        if (password) {
-          user.password = password;
-        }
-
-        const resultUser = this.users.save(user);
-        if (resultUser) {
-          return {
-            ok: Boolean(resultUser),
-          };
-        } else {
-          throw new Error('Failed to modify user profile.');
-        }
+      if (email) {
+        user.email = email;
+        user.verified = false;
+        const verification = await this.verifications.save(
+          this.verifications.create({ user }),
+        );
+        this.mailService.sendVerificationEmail(user.email, verification.code);
       }
-    } catch (error) {
+      if (password) {
+        user.password = password;
+      }
+      await this.users.save(user);
       return {
-        ok: false,
-        error,
+        ok: true,
       };
+    } catch (error) {
+      return { ok: false, error };
     }
   }
 
