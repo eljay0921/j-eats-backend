@@ -34,6 +34,31 @@ describe('MailService', () => {
     expect(service).toBeDefined();
   });
 
-  it.todo('sendVerificationEmail');
+  describe('sendVerificationEmail', () => {
+    it('should call sendEmail', async () => {
+      const sendVerificationEmailArgs = {
+        email: 'some.mail@test.com',
+        code: 'some.code',
+      };
+
+      // mockImplementation은 해당 함수의 구현부를 가로챌 수 있게 해주는 것
+      jest.spyOn(service, 'sendEmail').mockImplementation(async () => {});
+
+      service.sendVerificationEmail(
+        sendVerificationEmailArgs.email,
+        sendVerificationEmailArgs.code,
+      );
+
+      expect(service.sendEmail).toHaveBeenCalledTimes(1);
+      expect(service.sendEmail).toHaveBeenCalledWith(
+        'Verify your email~',
+        'confirm_account',
+        [
+          { key: 'code', value: sendVerificationEmailArgs.code },
+          { key: 'username', value: sendVerificationEmailArgs.email },
+        ],
+      );
+    });
+  });
   it.todo('sendEmail');
 });
