@@ -2,12 +2,15 @@ import { Test } from '@nestjs/testing';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
 import { MailService } from './mail.service';
 
-jest.mock('got', () => {});
-jest.mock('form-data', () => {
-  return {
-    append: jest.fn(),
-  };
-});
+import got from 'got';
+import * as FormData from 'form-data';
+import { string } from 'joi';
+
+// 모듈 자체를 mocking 하는 방법
+jest.mock('got');
+jest.mock('form-data');
+
+const TEST_DOMAIN = 'test-domain';
 
 describe('MailService', () => {
   let service: MailService;
@@ -20,7 +23,7 @@ describe('MailService', () => {
           provide: CONFIG_OPTIONS,
           useValue: {
             apiKey: 'test-apiKey',
-            domain: 'test-domain',
+            domain: TEST_DOMAIN,
             fromEmail: 'test-fromEmail',
           },
         },
@@ -60,5 +63,20 @@ describe('MailService', () => {
       );
     });
   });
-  it.todo('sendEmail');
+
+  describe('sendEmail', () => {
+    it('send email', async () => {
+      service.sendEmail('', '', []);
+
+      // new FormData();로 생성한 객체에서 append 함수를 활용하고 있으므로, prototype을 spying 해야함.
+      // 그리고 object 자체를 mocking (spying) 하려는 목적이므로 mockImplementation은 구현하지 않는다.
+      const formDataAppendSpy = jest.spyOn(FormData.prototype, 'append');
+      expect(formDataAppendSpy).toHaveBeenCalled();
+      expect(got).toHaveBeenCalledTimes(1);
+      expect(got).toHaveBeenCalledWith(
+        `https://api.mailgun.net/v3/${TEST_DOMAIN}/messages`,
+        expect.any(Object),
+      );
+    });
+  });
 });
