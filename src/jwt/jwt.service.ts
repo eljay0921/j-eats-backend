@@ -14,10 +14,6 @@ export class JwtService {
   }
 
   verify(token: string) {
-    try {
-      return jwt.verify(token, this.options.privateKey);
-    } catch (err) {
-      console.log(err);
-    }
+    return jwt.verify(token, this.options.privateKey);
   }
 }

@@ -45,7 +45,7 @@ describe('MailService', () => {
       };
 
       // mockImplementation은 해당 함수의 구현부를 가로챌 수 있게 해주는 것
-      jest.spyOn(service, 'sendEmail').mockImplementation(async () => {});
+      jest.spyOn(service, 'sendEmail').mockImplementation(async () => true);
 
       service.sendVerificationEmail(
         sendVerificationEmailArgs.email,
@@ -66,17 +66,28 @@ describe('MailService', () => {
 
   describe('sendEmail', () => {
     it('send email', async () => {
-      service.sendEmail('', '', []);
+      const result = await service.sendEmail('', '', [
+        { key: 'some.key', value: 'some.value' },
+      ]);
+      expect(result).toEqual(true);
 
       // new FormData();로 생성한 객체에서 append 함수를 활용하고 있으므로, prototype을 spying 해야함.
       // 그리고 object 자체를 mocking (spying) 하려는 목적이므로 mockImplementation은 구현하지 않는다.
       const formDataAppendSpy = jest.spyOn(FormData.prototype, 'append');
-      expect(formDataAppendSpy).toHaveBeenCalled();
-      expect(got).toHaveBeenCalledTimes(1);
-      expect(got).toHaveBeenCalledWith(
+      expect(formDataAppendSpy).toHaveBeenCalledTimes(5);
+      expect(got.post).toHaveBeenCalledTimes(1);
+      expect(got.post).toHaveBeenCalledWith(
         `https://api.mailgun.net/v3/${TEST_DOMAIN}/messages`,
         expect.any(Object),
       );
+    });
+
+    it('fails on error', async () => {
+      jest.spyOn(got, 'post').mockImplementation(() => {
+        throw new Error();
+      });
+      const result = await service.sendEmail('', '', []);
+      expect(result).toEqual(false);
     });
   });
 });
