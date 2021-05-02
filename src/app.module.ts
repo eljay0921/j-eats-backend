@@ -26,7 +26,7 @@ import { MailModule } from './mail/mail.module';
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
-          .valid('dev', 'prod')
+          .valid('dev', 'prod', 'test')
           .required(),
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.string().required(),
@@ -47,7 +47,7 @@ import { MailModule } from './mail/mail.module';
       password: process.env.DB_PASSWORD, // 사실 localhost로 연결할 때는 비말번호를 묻지 않기 때문에 입력하지 않아도 됨
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod', // DB에 연결할 때, DB를 현재 모듈의 상태로 마이그레이션
-      logging: true,
+      logging: process.env.NODE_ENV === 'dev',
       entities: [User, Verification],
     }),
     GraphQLModule.forRoot({
